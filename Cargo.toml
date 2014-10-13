@@ -1,0 +1,8 @@
+[package]
+
+name = "rtop"
+version = "0.0.1"
+authors = ["Jakob Gillich <jakob@gillich.me>"]
+
+[dependencies.ncurses]
+git = "https://github.com/jeaye/ncurses-rs.git"
