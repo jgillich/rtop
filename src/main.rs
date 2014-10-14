@@ -5,27 +5,26 @@ extern crate ncurses;
 use std::io::Timer;
 use std::time::Duration;
 
-pub mod cpu;
 pub mod statgrab;
-
+mod cpu;
+mod disk;
 
 fn main() {
     /* Setup ncurses. */
     ncurses::initscr();
     ncurses::raw();
 
-    /* Allow for extended keyboard (like F1). */
-    ncurses::keypad(ncurses::stdscr, true);
     ncurses::noecho();
+    // TODO get refresh rate from args
+    ncurses::halfdelay(10);
 
-    /* Invisible cursor. */
-    //ncurses::curs_set(ncurses::CURSOR_INVISIBLE);
+    statgrab::init();
 
-    ncurses::refresh();
+    // Invisible cursor.
+    ncurses::curs_set(ncurses::CURSOR_INVISIBLE);
 
-
-    let win: ncurses::WINDOW = create_win();
-    cpu::draw_dashboard(win);
+    let cpu_win = ncurses::newwin(3, ncurses::COLS, 0, 0);
+    let disk_win = ncurses::newwin(3, ncurses::COLS, 1, 0);
 
     let mut ch = ncurses::getch();
     // loop until q is pressed
@@ -33,29 +32,12 @@ fn main() {
         match ch {
           _ => {}
         }
-
+        cpu::draw_dashboard(cpu_win);
+        disk::draw_dashboard(disk_win);
         ch = ncurses::getch();
     }
 
     ncurses::endwin();
-    /*
-    let mut timer = Timer::new().unwrap();
-    let periodic = timer.periodic(Duration::milliseconds(1000));
-    loop {
-        periodic.recv();
-        let stats = statgrab::get_cpu_percents();
-        ncurses::printw(format!("{} {} {} {} {} {}", stats.user, stats.kernel, stats.idle, stats.iowait, stats.swap, stats.nice).to_string().as_slice());
-        ncurses::refresh();
-    }*/
-
-
-}
-
-fn create_win() -> ncurses::WINDOW {
-    let win = ncurses::newwin(ncurses::LINES / 3, ncurses::COLS / 3, ncurses::LINES / 2, ncurses::COLS / 2);
-    ncurses::box_(win, 0, 0);
-    ncurses::wrefresh(win);
-    win
 }
 
 fn destroy_win(win: ncurses::WINDOW) {
